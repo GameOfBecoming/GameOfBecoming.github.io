@@ -15,21 +15,38 @@
 
   <script>
     async function send() {
-      const input = document.getElementById("input").value;
+      const inputEl = document.getElementById("input");
+      const outputEl = document.getElementById("output");
 
-      document.getElementById("output").innerText = "Processing...";
+      const input = inputEl.value.trim();
 
-      const res = await fetch("https://YOUR-VERCEL-URL/api/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ input })
-      });
+      if (!input) {
+        outputEl.innerText = "Please enter a prompt.";
+        return;
+      }
 
-      const data = await res.json();
+      outputEl.innerText = "Processing...";
 
-      document.getElementById("output").innerText = data.output;
+      try {
+        const res = await fetch("https://game-of-becoming-github-io.vercel.app/api/process", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ input })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          outputEl.innerText = "Error: " + (data.error || "Unknown error");
+          return;
+        }
+
+        outputEl.innerText = data.output || "No output returned.";
+      } catch (err) {
+        outputEl.innerText = "Network error: " + err.message;
+      }
     }
   </script>
 
