@@ -1,6 +1,17 @@
 export default async function handler(req, res) {
   try {
-    const userInput = req.body.input;
+    // ✅ FIX: safely parse body
+    const body = typeof req.body === "string"
+      ? JSON.parse(req.body)
+      : req.body;
+
+    const userInput = body?.input;
+
+    if (!userInput) {
+      return res.status(400).json({
+        error: "No input provided"
+      });
+    }
 
     const systemPrompt = `
 You are Game of Becoming.
@@ -31,12 +42,12 @@ NEXT ACTION:
 
     const data = await response.json();
 
-    res.status(200).json({
+    return res.status(200).json({
       output: data.choices[0].message.content
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       error: error.message
     });
   }
