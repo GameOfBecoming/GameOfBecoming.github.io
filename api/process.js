@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
   try {
-    // ✅ FIX: safely parse body
     const body = typeof req.body === "string"
       ? JSON.parse(req.body)
       : req.body;
@@ -8,21 +7,8 @@ export default async function handler(req, res) {
     const userInput = body?.input;
 
     if (!userInput) {
-      return res.status(400).json({
-        error: "No input provided"
-      });
+      return res.status(400).json({ error: "No input provided" });
     }
-
-    const systemPrompt = `
-You are Game of Becoming.
-
-Respond strictly in:
-
-STATE:
-ANALYSIS:
-TRANSITION:
-NEXT ACTION:
-`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -34,13 +20,34 @@ NEXT ACTION:
         model: "gpt-4.1-mini",
         temperature: 0.3,
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userInput }
+          {
+            role: "system",
+            content: `You are Game of Becoming. Respond in STATE / ANALYSIS / TRANSITION / NEXT ACTION format.`
+          },
+          {
+            role: "user",
+            content: userInput
+          }
         ]
       })
     });
 
     const data = await response.json();
+
+    // 🔍 DEBUG OUTPUT (IMPORTANT)
+    if (!response.ok) {
+      return res.status(500).json({
+        error: "OpenAI error",
+        details: data
+      });
+    }
+
+    if (!data.choices || !data.choices[0]) {
+      return res.status(500).json({
+        error: "Invalid OpenAI response",
+        raw: data
+      });
+    }
 
     return res.status(200).json({
       output: data.choices[0].message.content
