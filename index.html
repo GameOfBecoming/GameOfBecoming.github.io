@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game of Becoming</title>
+</head>
+
+<body style="font-family: Arial; max-width: 700px; margin: 40px auto;">
+
+  <h2>🜂 Game of Becoming</h2>
+
+  <input id="input" placeholder="Enter prompt..." style="width: 80%; padding: 10px;" />
+  <button onclick="send()">Enter</button>
+
+  <pre id="output" style="margin-top: 20px; white-space: pre-wrap;"></pre>
+
+  <script>
+    async function send() {
+      const input = document.getElementById("input").value;
+
+      document.getElementById("output").innerText = "Processing...";
+
+      const res = await fetch("https://YOUR-VERCEL-URL/api/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ input })
+      });
+
+      const data = await res.json();
+
+      document.getElementById("output").innerText = data.output;
+    }
+  </script>
+
+</body>
+</html>
